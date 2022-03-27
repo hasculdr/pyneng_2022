@@ -30,3 +30,19 @@ Out[1]: '11111111111111111111111111110000'
 
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 """
+ntwrk = input('Введите адрес сети в формате "10.1.1.0/24": ')
+ntwrk_list = ntwrk.split('/')
+addr_list = ntwrk_list[0].split('.')
+mask_dec = ntwrk_list[1]
+ones = int(mask_dec)
+zeroes = 32 - int(mask_dec)
+mask_bin = '1' * ones + '0' * zeroes
+print(f'''
+Network:
+{addr_list[0]:<10}{addr_list[1]:<10}{addr_list[2]:<10}{addr_list[3]:<10}
+{int(addr_list[0]):>08b}  {int(addr_list[1]):>08b}  {int(addr_list[2]):>08b}  {int(addr_list[3]):>08b}
+
+Mask:
+/{ntwrk_list[1]}
+{int(mask_bin[0:8], 2):<10}{int(mask_bin[8:16], 2):<10}{int(mask_bin[16:24], 2):<10}{int(mask_bin[24:], 2):<10}
+{mask_bin[0:8]}  {mask_bin[8:16]}  {mask_bin[16:24]}  {mask_bin[24:]}''')

@@ -49,3 +49,30 @@ bin_ip = "00001010000000010000000111000011"
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 
 """
+ntwrk = input('Введите ip-адрес в формате "10.1.1.0/24": ')
+#ntwrk = '10.5.5.1/24'
+ntwrk_list = ntwrk.split('/')
+addr_list = ntwrk_list[0].split('.')
+mask_dec = ntwrk_list[1]
+ones = int(mask_dec)
+zeroes = 32 - int(mask_dec)
+addr_bin_first_octet = bin(int(addr_list[0])).lstrip('0b')
+addr_bin_second_octet = bin(int(addr_list[1])).lstrip('0b')
+addr_bin_third_octet = bin(int(addr_list[2])).lstrip('0b')
+addr_bin_fourth_octet = bin(int(addr_list[3])).lstrip('0b')
+addr_bin = f'''\
+{addr_bin_first_octet.strip():>08}\
+{addr_bin_second_octet.strip():>08}\
+{addr_bin_third_octet.strip():>08}\
+{addr_bin_fourth_octet.strip():>08}'''
+ntwrk_addr_bin = addr_bin[0:int(mask_dec)] + '0' * zeroes
+mask_bin = '1' * ones + '0' * zeroes
+print(f'''
+Network:
+{int(ntwrk_addr_bin[0:8], 2):<8}  {int(ntwrk_addr_bin[8:16], 2):<8}  {int(ntwrk_addr_bin[16:24], 2):<8}  {int(ntwrk_addr_bin[24:], 2):<8}
+{ntwrk_addr_bin[0:8]:>8}  {ntwrk_addr_bin[8:16]:>8}  {ntwrk_addr_bin[16:24]:>8}  {ntwrk_addr_bin[24:]:>8}
+
+Mask:
+/{ntwrk_list[1]}
+{int(mask_bin[0:8], 2):<8}  {int(mask_bin[8:16], 2):<8}  {int(mask_bin[16:24], 2):<8}  {int(mask_bin[24:], 2):<8}
+{mask_bin[0:8]}  {mask_bin[8:16]}  {mask_bin[16:24]}  {mask_bin[24:]}''')
