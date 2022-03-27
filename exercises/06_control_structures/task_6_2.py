@@ -12,3 +12,15 @@
 
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 """
+userinput = input('Введите ip-адрес в формате "10.0.1.1": ')
+octet_list = userinput.split('.')
+if int(octet_list[0]) in range(1,224):
+   print('unicast')
+elif int(octet_list[0]) in range(224,240):
+   print('multicast')
+elif userinput == '255.255.255.255':
+   print('local broadcast')
+elif userinput == '0.0.0.0':
+   print('unassigned')
+else:
+   print('unused')
