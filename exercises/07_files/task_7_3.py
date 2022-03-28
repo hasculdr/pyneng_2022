@@ -20,3 +20,9 @@
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 
 """
+with open('CAM_table.txt') as file:
+    for line in file:
+        striped = line.rstrip()
+        if striped[1:2].isdigit():
+            tmp_list = striped.split()
+            print(f'''{tmp_list[0]:10}{tmp_list[1]:20}{tmp_list[3]:5}''')

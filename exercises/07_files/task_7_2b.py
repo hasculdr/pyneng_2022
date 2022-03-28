@@ -17,3 +17,16 @@
 """
 
 ignore = ["duplex", "alias", "configuration"]
+
+from sys import argv
+
+filein = argv[1]
+fileout = argv[2]
+ignore.append('!')
+first, second, third, fourth = ignore
+with open(filein) as filein_obj, open(fileout, 'w') as fileout_obj:
+    for line in filein_obj:
+        if first not in line and second not in line and third not in line and fourth not in line:
+            fileout_obj.write(line)
+        else:
+            pass
