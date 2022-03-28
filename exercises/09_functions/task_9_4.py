@@ -45,6 +45,8 @@
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 """
 
+from pprint import pprint
+
 ignore = ["duplex", "alias", "configuration"]
 
 
@@ -64,3 +66,29 @@ def ignore_command(command, ignore):
         if word in command:
             ignore_status = True
     return ignore_status
+
+def convert_config_to_dict(config_filename):
+    with open(config_filename) as file:
+        config_list = file.readlines()
+        ignore.append('!')
+        config_dict = dict()
+        dict_value = list()
+    for line in config_list:
+        check = ignore_command(line, ignore)
+        if check:
+            continue
+        else:
+            if not line.startswith(' ') and not line == '\n':
+                if dict_value:
+                    key_list = list(config_dict.keys())
+                    key = key_list[-1]
+                    config_dict[key] = dict_value
+                    dict_value = []
+                    config_dict[line.strip()] = []
+                else:
+                    config_dict[line.strip()] = []
+            elif line.startswith(' '):
+                dict_value.append(line.strip())
+    return(config_dict)
+
+pprint(convert_config_to_dict('config_sw1.txt'))
