@@ -42,6 +42,9 @@ C-3PO,c3po@gmail.com,16/12/2019 17:24
 """
 
 import datetime
+import csv
+from pprint import pprint
+
 
 
 def convert_str_to_datetime(datetime_str):
@@ -56,3 +59,40 @@ def convert_datetime_to_str(datetime_obj):
     Конвертирует строку с датой в формате 11/10/2019 14:05 в объект datetime.
     """
     return datetime.datetime.strftime(datetime_obj, "%d/%m/%Y %H:%M")
+
+def write_last_log_to_csv(source_log, output):
+    with open(source_log) as input_file:
+        readed_data = csv.reader(input_file)
+        csv_to_list = [elem for elem in readed_data]
+        headers = csv_to_list.pop(0)
+        result_dict = dict()
+        for elem in csv_to_list:
+            tmp_dict = dict()
+            tmp_dict[elem[1]] = [(elem[0], elem[2])]
+            if elem[1] not in result_dict:
+                result_dict.update(tmp_dict)
+            else:
+                result_dict[elem[1]].append((elem[0], elem[2]))
+    items_list = list(result_dict.items())
+    result_list = list()
+    result_list.append(headers)
+    for thing in items_list:
+            if len(thing[1]) == 1:
+                result_list.append([thing[1][0][0], thing[0], thing[1][0][1]])
+            else:
+                data_comparing_list = list()
+                for tupple_elem in thing[1]:
+                    data_comparing_list.append(convert_str_to_datetime(tupple_elem[1]))
+                    last_date_obj = max(data_comparing_list)
+                    last_str_obj = convert_datetime_to_str(last_date_obj)
+                for tupple_elem in thing[1]:
+                    if last_str_obj in tupple_elem:
+                        result_list.append([tupple_elem[0], thing[0], tupple_elem[1]])
+    with open(output, 'w') as output_file:
+        csv_writer_obj = csv.writer(output_file)
+        for elem in result_list:
+            csv_writer_obj.writerow(elem)
+    #return(result_list)
+
+if __name__ == '__main__':
+    pprint(write_last_log_to_csv('mail_log.csv', 'new_log.csv'))

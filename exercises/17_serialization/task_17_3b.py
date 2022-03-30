@@ -43,3 +43,32 @@
 > pip install graphviz
 
 """
+from draw_network_graph import draw_topology
+import yaml
+from pprint import pprint
+
+def transform_topology(yaml_file):
+    with open(yaml_file) as input:
+        redundant_dict = yaml.safe_load(input)
+    redundant_dict_with_tuples = dict()
+    for thing in redundant_dict: # thing - ключ трехуровневого словаря, значение - двухуровневый словарь
+        local_device = thing # это возвращает ключ верхрего уровня
+        for another_thing in redundant_dict[thing]: # another_thing - ключ двухуровневого словаря, соответствующее значение - словарь
+            for elem in redundant_dict[thing][another_thing]: # elem - ключ нижнего слованя, соответствующее значение - строка
+                remote_port = redundant_dict[thing][another_thing][elem] # значение нижнего словаря
+                remote_device = elem # ключ нижнего словаря
+                local_port = another_thing # ключ "среднего словаря"
+                temp = {(local_device, local_port): (remote_device, remote_port)}
+                redundant_dict_with_tuples.update(temp)
+    tmp_list = list(redundant_dict_with_tuples.items())
+    for elem_big in tmp_list:
+        for elem_small in tmp_list:
+            if elem_big[0] == elem_small[1]:
+                tmp_list.remove(elem_big)
+    normalized_dict = dict(tmp_list)
+    return(normalized_dict)
+
+if __name__ == '__main__':
+    result = transform_topology('topology.yaml')
+    pprint(transform_topology('topology.yaml'))
+    draw_topology(result, "img/my_topology")

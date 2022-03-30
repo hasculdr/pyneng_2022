@@ -31,3 +31,32 @@ sw3,00:E9:22:11:A6:50,100.1.1.7,3,FastEthernet0/21
 sw2_dhcp_snooping.txt, sw3_dhcp_snooping.txt.
 
 """
+import re
+import csv
+
+filenames = ['sw1_dhcp_snooping.txt', 'sw2_dhcp_snooping.txt', 'sw3_dhcp_snooping.txt']
+
+def write_dhcp_snooping_to_csv(filenames, output):
+    hostname = re.compile(r'(?P<host>\w+)_\w+_\w+')
+    data_record = re.compile(r'(?P<mac>(?:\w{2}:){5}\w{2})\s+'
+                             r'(?P<ip>(?:\d+\.){3}\d+)\s+'
+                             r'\d+\s+\S+\s+'
+                             r'(?P<vlan>\d+)\s+'
+                             r'(?P<int>\S+)')
+    result_list = [['switch','mac','ip','vlan','interface']]
+    for file in filenames:
+        hostname_match = hostname.search(file)
+        with open(file) as file_obj:
+            tmp_list = file_obj.readlines()
+        for line in tmp_list:
+            data_match = data_record.search(line)
+            if data_match:
+                result_list.append([f'''{hostname_match.group('host')}''',f'''{data_match.group('mac')}''',f'''{data_match.group('ip')}''',f'''{data_match.group('vlan')}''',f'''{data_match.group('int')}'''])
+    with open(output, 'w') as file_obj:
+        csv_writer_obj = csv.writer(file_obj)
+        for elem in result_list:
+            csv_writer_obj.writerow(elem)
+
+
+if __name__ == '__main__':
+    write_dhcp_snooping_to_csv(filenames, 'output_1.csv')
