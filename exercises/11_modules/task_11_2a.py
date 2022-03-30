@@ -82,8 +82,9 @@ infiles = [
     "sh_cdp_n_r2.txt",
     "sh_cdp_n_r3.txt",
 ]
-redundant_dict = create_network_map(infiles)
+
 def unique_network_map(topology_dict):
+    redundant_dict = create_network_map(infiles)
     tmp_list = list(redundant_dict.items())
     for elem_big in tmp_list:
         for elem_small in tmp_list:

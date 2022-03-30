@@ -24,3 +24,21 @@
 а не ввод пользователя.
 
 """
+import re
+from pprint import pprint
+
+def get_ip_from_cfg(filename):
+    with open(filename) as file:
+        config_string = file.read()
+        config_list = config_string.split('!')
+    regex = re.compile(r'interface (\S+).+?address (\d+\.\d+\.\d+\.\d+) (\d+\.\d+\.\d+\.\d+)', re.DOTALL)
+    matches = list()
+    for line in config_list:
+        match_obj = regex.search(line)
+        if match_obj:
+            matches.append(match_obj.groups())
+    result = {elem[0]: (elem[1], elem[2]) for elem in matches}
+    return(result)
+
+if __name__ == '__main__':
+    pprint(get_ip_from_cfg('config_r1.txt'))
