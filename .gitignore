@@ -30,6 +30,9 @@ Thumbs.db
 *.un~
 *.pyc
 *.swp
+pyneng.egg-info
+build
+exercises/11_modules/img
 
 # VSCode files
 .vscode/
