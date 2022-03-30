@@ -34,3 +34,28 @@
  '172.21.41.129', '172.21.41.130', '172.21.41.131', '172.21.41.132']
 
 """
+from pprint import pprint
+
+#ip_list = ["10.1.1.1", "10.4.10.10-13", "192.168.1.12-192.168.1.15"]
+ip_list = ['8.8.4.4', '1.1.1.1-3', '172.21.41.128-172.21.41.132']
+
+def convert_ranges_to_ip_list(ip_list):
+    verbose_list = list()
+    for elem in ip_list:
+        if '-' not in elem:
+            verbose_list.append(elem)
+        else:
+            start, end = elem.split('-')
+            first, second, third, fourth_start = start.split('.')
+            verbose_list.append(start)
+            if len(end) > 3:
+                *trash, fourth_end = end.split('.')
+                for num in range(int(fourth_start)+1, int(fourth_end)+1):
+                    verbose_list.append(f'{first}.{second}.{third}.{num}')
+            else:
+                for num in range(int(fourth_start)+1, int(end)+1):
+                    verbose_list.append(f'{first}.{second}.{third}.{num}')
+    return(verbose_list)
+
+if __name__ == '__main__':
+    print(convert_ranges_to_ip_list(ip_list))
