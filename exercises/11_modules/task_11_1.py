@@ -43,6 +43,15 @@ def parse_cdp_neighbors(command_output):
     и с файлами и с выводом с оборудования.
     Плюс учимся работать с таким выводом.
     """
+    result_dict = dict()
+    hostname = command_output.split('>')[0].strip()
+    neighbors_str = command_output.split('Port ID')[-1].strip()
+    neighbors_list = neighbors_str.split('\n')
+    for line in neighbors_list:
+        neighbor = line.split()
+        device, local_int_type, local_int_num, *trash, remote_int_type, remote_int_num = neighbor
+        result_dict[(hostname, local_int_type+local_int_num)] = (device, remote_int_type+remote_int_num)
+    return(result_dict)
 
 
 if __name__ == "__main__":
