@@ -49,9 +49,46 @@ In [12]: pprint(result)
                         'R1(config)#'})
 
 """
-
+import yaml
+import re
+from netmiko import ConnectHandler
+from pprint import pprint
 # списки команд с ошибками и без:
 commands_with_errors = ["logging 0255.255.1", "logging", "a"]
 correct_commands = ["logging buffered 20010", "ip http server"]
-
 commands = commands_with_errors + correct_commands
+#commands = correct_commands + commands_with_errors
+def send_config_commands(device, config_commands, log=True, choise=True):
+    complete = dict()
+    errors = dict()
+    if log:
+        print(f'''Подключение к {device['host']}''')
+    with ConnectHandler(**device) as ssh:
+        ssh.enable()
+        for cmd in commands:
+            result = ssh.send_config_set(cmd)
+            if '%' not in result:
+                complete[cmd] = result
+            else:
+                errors[cmd] = result
+                err = re.search(r'%\s(.+?)\n', result)
+                print(f'''Команда "{cmd}" выполнилась с ошибкой "{err.group(1)}" на устройстве {device['host']}''')
+                if choise:
+                    decide = input('Продолжать выполнять команды? [y]/n: ')
+                    if decide != 'n' and decide != 'no':
+                        pass
+                    else:
+                        break
+                else:
+                    pass    
+        #for key in errors:
+            #err = re.search(r'%\s(.+?)\n', errors[key])
+            #print(f'''Команда "{key}" выполнилась с ошибкой "{err.group(1)}" на устройстве {device['host']}''')
+    return(complete, errors)
+
+if __name__ == "__main__":
+    with open("devices.yaml") as f:
+        devices = yaml.safe_load(f)
+
+    for device in devices:
+        pprint(send_config_commands(device, commands))

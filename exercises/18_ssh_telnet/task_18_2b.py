@@ -92,9 +92,36 @@ R1(config)#logging
 R1(config)#a
 % Ambiguous command:  "a"
 """
-
+import yaml
+import re
+from netmiko import ConnectHandler
+from pprint import pprint
 # списки команд с ошибками и без:
 commands_with_errors = ["logging 0255.255.1", "logging", "a"]
 correct_commands = ["logging buffered 20010", "ip http server"]
-
 commands = commands_with_errors + correct_commands
+
+def send_config_commands(device, config_commands, log=True):
+    if log:
+        print(f'''Подключение к {device['host']}''')
+    complete = dict()
+    errors = dict()
+    ssh = ConnectHandler(**device)
+    ssh.enable()
+    for cmd in commands:
+        result = ssh.send_config_set(cmd)
+        if '%' not in result:
+            complete[cmd] = result
+        else:
+            errors[cmd] = result
+    for key in errors:
+        err = re.search(r'%\s(.+?)\n', errors[key])
+        print(f'''Команда "{key}" выполнилась с ошибкой "{err.group(1)}" на устройстве {device['host']}''')
+    return(complete, errors)
+
+if __name__ == "__main__":
+    with open("devices.yaml") as f:
+        devices = yaml.safe_load(f)
+
+    for device in devices:
+        pprint(send_config_commands(device, commands))

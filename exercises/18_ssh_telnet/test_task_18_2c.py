@@ -155,3 +155,4 @@ def test_function_return_value_continue_no(
         assert correct_commands == list(return_good) and commands_with_errors[
             :1
         ] == list(return_bad), "Функция возвращает неправильное значение"
+
