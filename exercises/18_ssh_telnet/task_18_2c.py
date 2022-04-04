@@ -53,11 +53,12 @@ import yaml
 import re
 from netmiko import ConnectHandler
 from pprint import pprint
+
 # списки команд с ошибками и без:
 commands_with_errors = ["logging 0255.255.1", "logging", "a"]
 correct_commands = ["logging buffered 20010", "ip http server"]
 commands = commands_with_errors + correct_commands
-#commands = correct_commands + commands_with_errors
+
 def send_config_commands(device, config_commands, log=True, choise=True):
     complete = dict()
     errors = dict()
@@ -80,10 +81,7 @@ def send_config_commands(device, config_commands, log=True, choise=True):
                     else:
                         break
                 else:
-                    pass    
-        #for key in errors:
-            #err = re.search(r'%\s(.+?)\n', errors[key])
-            #print(f'''Команда "{key}" выполнилась с ошибкой "{err.group(1)}" на устройстве {device['host']}''')
+                    pass
     return(complete, errors)
 
 if __name__ == "__main__":
