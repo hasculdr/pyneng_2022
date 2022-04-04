@@ -105,3 +105,65 @@ R3#
 
 Для выполнения задания можно создавать любые дополнительные функции.
 """
+from concurrent.futures import ThreadPoolExecutor
+import yaml
+
+from netmiko import ConnectHandler
+
+import logging
+from datetime import datetime
+
+def send_show_cmd(device, cmd):
+    with ConnectHandler(**device) as ssh:
+        ssh.enable()
+        prompt = ssh.find_prompt()
+        result = ssh.send_command(cmd)
+    return(prompt + cmd + result + '\n')
+
+def send_conf_cmd(device, cmd):
+    with ConnectHandler(**device) as ssh:
+        ssh.enable()
+        prompt = ssh.find_prompt()
+        result = ssh.send_config_set(cmd)
+    return(result)
+
+def devices_list(devices_file):
+    with open('devices.yaml') as f:
+        devices = yaml.safe_load(f)
+    return(devices)
+
+def send_commands_to_devices(devices, filename, *, show=None, config=None, limit=3):
+    if show and not config:
+        with ThreadPoolExecutor(max_workers=limit) as executor:
+            future_obj_list = list()
+            for dev in devices:
+                logging.info(f'''===> {datetime.now().time()} Trying: {dev['host']}''')
+                future_obj = executor.submit(send_show_cmd, dev, show)
+                future_obj_list.append(future_obj)
+                logging.info(f'''<=== {datetime.now().time()} Done: {dev['host']}''')
+        with open(filename, 'w') as f:
+            for obj in future_obj_list:
+                f.write(obj.result())
+    elif config and not show:
+        with ThreadPoolExecutor(max_workers=limit) as executor:
+            future_obj_list = list()
+            for dev in devices:
+                logging.info(f'''===> {datetime.now().time()} Trying: {dev['host']}''')
+                future_obj = executor.submit(send_conf_cmd, dev, config)
+                future_obj_list.append(future_obj)
+                logging.info(f'''<=== {datetime.now().time()} Done: {dev['host']}''')
+        with open(filename, 'w') as f:
+            for obj in future_obj_list:
+                f.write(obj.result())
+    else:
+        raise ValueError
+
+logging.basicConfig(
+    format = '%(threadName)s %(name)s %(levelname)s: %(message)s',
+    level=logging.INFO)
+
+if __name__ == "__main__":
+    commands = ['router ospf 55', 'network 0.0.0.0 255.255.255.255 area 0']
+    devices_file = 'devices.yaml'
+    filename = '19_4_result.txt'
+    send_commands_to_devices(devices_list(devices_file), filename, config=commands)
