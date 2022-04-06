@@ -35,3 +35,20 @@ data = {
     "tun_ip_1": "10.0.1.1 255.255.255.252",
     "tun_ip_2": "10.0.1.2 255.255.255.252",
 }
+
+from jinja2 import Environment, FileSystemLoader
+def create_vpn_config(template1, template2, data_dict):
+    env = Environment(
+        loader=FileSystemLoader('.'),
+        trim_blocks=True,
+        lstrip_blocks=True)
+    templ1 = env.get_template(template1)
+    vpn1 = templ1.render(data_dict)
+    templ2 = env.get_template(template2)
+    vpn2 = templ2.render(data_dict)
+    return(vpn1, vpn2,)
+
+if __name__ == "__main__":
+    template1 = "templates/gre_ipsec_vpn_1.txt"
+    template2 = "templates/gre_ipsec_vpn_2.txt"
+    print(create_vpn_config(template1, template2, data))
