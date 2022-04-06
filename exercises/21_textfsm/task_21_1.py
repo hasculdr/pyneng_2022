@@ -16,7 +16,13 @@
 
 """
 from netmiko import ConnectHandler
+from textfsm import TextFSM
 
+def parse_command_output(template, command_output):
+    with open(template) as template_obj:
+        fsm_obj = TextFSM(template_obj)
+        fsm_parse_result = fsm_obj.ParseText(command_output)
+    return([fsm_obj.header] + fsm_parse_result)
 # вызов функции должен выглядеть так
 if __name__ == "__main__":
     r1_params = {
@@ -24,7 +30,7 @@ if __name__ == "__main__":
         "host": "192.168.100.1",
         "username": "cisco",
         "password": "cisco",
-        "secret": "cisco",
+        "secret": "cisco"
     }
     with ConnectHandler(**r1_params) as r1:
         r1.enable()
