@@ -63,3 +63,93 @@ ValueError                                Traceback (most recent call last)
 ValueError: При выполнении команды "logging 0255.255.1" на устройстве 192.168.100.1 возникла ошибка -> Invalid input detected at '^' marker.
 
 """
+import telnetlib
+import time
+from textfsm import clitable
+import re
+
+class CiscoTelnet:
+    def __init__(self, ip, username, password, secret):
+        self.connection = telnetlib.Telnet(ip, port=23, timeout=10)
+        self.ip = ip
+        self._write_line(username)
+        self._write_line(password)
+        self._write_line('enable')
+        self._write_line(secret)
+        self.connection.read_until(b'#', timeout=3)
+
+
+    def _write_line(self, str):
+        line = str.encode("ascii") + b"\n"
+        return(self.connection.write(line))
+
+
+    def send_show_command(self, show_command, parse=True, templates='templates', index='index'):
+        if parse:
+            attributes = {'Command': show_command, 'Vendor': 'cisco_ios'}
+            self._write_line(show_command)
+            time.sleep(5)
+            output = self.connection.read_very_eager().decode("utf-8")
+            result = list()
+            cli_table_obj = clitable.CliTable(index, templates)
+            cli_table_obj.ParseCmd(output, attributes)
+            header = list(cli_table_obj.header)
+            length = len(header)
+            for elem in cli_table_obj:
+                temp_dict = dict.fromkeys(header)
+                counter = 0
+                while counter < length:
+                    temp_dict[header[counter]] = elem[counter]
+                    counter += 1
+                result.append(temp_dict)
+            return(result)
+        else:
+            self._write_line(show_command)
+            time.sleep(5)
+            return(self.connection.read_very_eager().decode("utf-8"))
+
+
+    def send_config_commands(self, config_commands, strict=True):
+        self._write_line('configure terminal')
+        self.connection.read_until(b'#', timeout=3)
+        err_template = re.compile(r'%\s(.+)?\n')
+        if strict:
+            if type(config_commands) == list:
+                response = str()
+                for cmd in config_commands:
+                    self._write_line(cmd)
+                    result = self.connection.read_until(b'#', timeout=3).decode("utf-8")
+                    if '%' in result:
+                        err_msg = err_template.search(result).group(1)
+                        raise ValueError(f'''При выполнении команды "{cmd}" на устройстве {self.ip} возникла ошибка -> {err_msg}''')
+                    else:
+                        response += result
+            else:
+                self._write_line(config_commands)
+                response = self.connection.read_until(b'#', timeout=3).decode("utf-8")
+                if '%' in response:
+                    err_msg = err_template.search(response).group(1)
+                    raise ValueError(f'''При выполнении команды "{config_commands}" на устройстве {self.ip} возникла ошибка -> {err_msg}''')
+            return(response)
+        else: # strict=False
+            if type(config_commands) == list:
+                response = str()
+                for cmd in config_commands:
+                    self._write_line(cmd)
+                    result = self.connection.read_until(b'#', timeout=3).decode("utf-8")
+                    if '%' in result:
+                        err_msg = err_template.search(result).group(1)
+                        print(f'''При выполнении команды "{cmd}" на устройстве {self.ip} возникла ошибка -> {err_msg}''')
+                        response += result
+                    else:
+                        response += result
+            else:
+                self._write_line(config_commands)
+                response = self.connection.read_until(b'#', timeout=3).decode("utf-8")
+                if '%' in response:
+                    err_msg = err_template.search(response).group(1)
+                    print(f'''При выполнении команды "{config_commands}" на устройстве {self.ip} возникла ошибка -> {err_msg}''')
+            return(response)
+
+
+print(CiscoTelnet('192.168.100.1', 'cisco', 'cisco', 'cisco').send_config_commands(["interface loop55", "ip address 5.5.5.5 255.255.255.255"], strict=True))

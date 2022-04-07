@@ -51,6 +51,23 @@ In [13]: t.delete_link(('R5', 'Eth0/0'), ('R3', 'Eth0/2'))
 Такого соединения нет
 
 """
+class Topology:
+    def __init__(self, topology_example):
+        self.topology = self._normalize(topology_example)
+    def _normalize(self, topology_example):
+        tmp_list = list(topology_example.items())
+        for elem_big in tmp_list:
+            for elem_small in tmp_list:
+                if elem_big[0] == elem_small[1]:
+                    tmp_list.remove(elem_big)
+        return(dict(tmp_list))
+    def delete_link(self, key, value):
+        if self.topology.get(key):
+            del self.topology[key]
+        elif self.topology.get(value):
+            del self.topology[value]
+        else:
+            print("Такого соединения нет")
 
 topology_example = {
     ("R1", "Eth0/0"): ("SW1", "Eth0/1"),

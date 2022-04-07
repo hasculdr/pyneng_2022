@@ -31,3 +31,51 @@ In [6]: r1.send_config_commands(['interface loop55', 'ip address 5.5.5.5 255.255
 Out[6]: 'conf t\r\nEnter configuration commands, one per line.  End with CNTL/Z.\r\nR1(config)#interface loop55\r\nR1(config-if)#ip address 5.5.5.5 255.255.255.255\r\nR1(config-if)#end\r\nR1#'
 
 """
+import telnetlib
+import time
+from textfsm import clitable
+
+class CiscoTelnet:
+    def __init__(self, ip, username, password, secret):
+        self.connection = telnetlib.Telnet(ip, port=23, timeout=10)
+        self._write_line(username)
+        self._write_line(password)
+        self._write_line('enable')
+        self._write_line(secret)
+    def _write_line(self, str):
+        line = str.encode("ascii") + b"\n"
+        return(self.connection.write(line))
+    def send_show_command(self, show_command, parse=True, templates='templates', index='index'):
+        if parse:
+            attributes = {'Command': show_command, 'Vendor': 'cisco_ios'}
+            self._write_line(show_command)
+            time.sleep(5)
+            output = self.connection.read_very_eager().decode("utf-8")
+            result = list()
+            cli_table_obj = clitable.CliTable(index, templates)
+            cli_table_obj.ParseCmd(output, attributes)
+            header = list(cli_table_obj.header)
+            length = len(header)
+            for elem in cli_table_obj:
+                temp_dict = dict.fromkeys(header)
+                counter = 0
+                while counter < length:
+                    temp_dict[header[counter]] = elem[counter]
+                    counter += 1
+                result.append(temp_dict)
+            return(result)
+        else:
+            self._write_line(show_command)
+            time.sleep(5)
+            return(self.connection.read_very_eager().decode("utf-8"))
+    def send_config_commands(self, config_commands):
+        self._write_line('configure terminal')
+        if type(config_commands) == list:
+            for cmd in config_commands:
+                self._write_line(cmd)
+        else:
+            self._write_line(config_commands)
+        time.sleep(5)
+        return(self.connection.read_very_eager().decode("utf-8"))
+
+print(CiscoTelnet('192.168.100.1', 'cisco', 'cisco', 'cisco').send_config_commands(['interface fa0/1', 'no desc']))

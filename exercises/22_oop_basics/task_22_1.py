@@ -44,3 +44,13 @@ topology_example = {
     ("SW1", "Eth0/2"): ("R2", "Eth0/0"),
     ("SW1", "Eth0/3"): ("R3", "Eth0/0"),
 }
+
+class Topology:
+    def __init__(self, topology_example):
+        tmp_list = list(topology_example.items())
+        for elem_big in tmp_list:
+            for elem_small in tmp_list:
+                if elem_big[0] == elem_small[1]:
+                    tmp_list.remove(elem_big)
+        normalized_dict = dict(tmp_list)
+        self.topology = normalized_dict

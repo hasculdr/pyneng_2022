@@ -50,3 +50,49 @@ up      \r\nEthernet0/1                192.168.200.1   YES NVRAM  up...'
 
 
 """
+import telnetlib
+import time
+from textfsm import clitable
+
+class CiscoTelnet:
+    def __init__(self, ip, username, password, secret):
+        self.connection = telnetlib.Telnet(ip, port=23)
+        self._write_line(username)
+        self._write_line(password)
+        self._write_line('enable')
+        self._write_line(secret)
+        self.connection.read_until(b'#', timeout=3)
+
+
+    def _write_line(self, str):
+        line = (str.encode("ascii") + b"\n")
+        return(self.connection.write(line))
+
+
+    def send_show_command(self, show_command, parse=True, templates='templates', index='index'):
+        if parse:
+            attributes = {'Command': show_command, 'Vendor': 'cisco_ios'}
+            self._write_line(show_command)
+            time.sleep(5)
+            output = self.connection.read_very_eager().decode("utf-8")
+            result = list()
+            cli_table_obj = clitable.CliTable(index, templates)
+            cli_table_obj.ParseCmd(output, attributes)
+            header = list(cli_table_obj.header)
+            length = len(header)
+            for elem in cli_table_obj:
+                temp_dict = dict.fromkeys(header)
+                counter = 0
+                while counter < length:
+                    temp_dict[header[counter]] = elem[counter]
+                    counter += 1
+                result.append(temp_dict)
+            return(result)
+        else:
+            self._write_line(show_command)
+            time.sleep(5)
+            return(self.connection.read_very_eager().decode("utf-8"))
+
+
+
+print(CiscoTelnet('192.168.100.1', 'cisco', 'cisco', 'cisco').send_show_command('sh ip int br'))

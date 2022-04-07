@@ -11,8 +11,17 @@
 
 
 class Topology:
-    def __init__(self, topology_dict):
-        self.topology = self._normalize(topology_dict)
+    def _normalize(self, topology_example):
+        tmp_list = list(topology_example.items())
+        for elem_big in tmp_list:
+            for elem_small in tmp_list:
+                if elem_big[0] == elem_small[1]:
+                    tmp_list.remove(elem_big)
+        return(dict(tmp_list))
+
+    def __init__(self, topology_example):
+        self.topology = self._normalize(topology_example)
+
 
 
 topology_example = {

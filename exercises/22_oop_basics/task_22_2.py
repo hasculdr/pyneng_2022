@@ -47,3 +47,22 @@ self._write_line(line)
 
 Он не должен делать ничего другого.
 """
+import telnetlib
+import time
+
+class CiscoTelnet:
+    def __init__(self, ip, username, password, secret):
+        self.connection = telnetlib.Telnet(ip, port=23)
+        self._write_line(username)
+        self._write_line(password)
+        self._write_line('enable')
+        self._write_line(secret)
+    def _write_line(self, str):
+        line = str.encode("ascii") + b"\n"
+        return(self.connection.write(line))
+    def send_show_command(self, show_command):
+        self._write_line(show_command)
+        time.sleep(5)
+        return(self.connection.read_very_eager().decode("ascii"))
+
+print(CiscoTelnet('192.168.100.1', 'cisco', 'cisco', 'cisco').send_show_command('show clock'))
