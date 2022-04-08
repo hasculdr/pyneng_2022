@@ -32,7 +32,6 @@ Out[6]: 'conf t\r\nEnter configuration commands, one per line.  End with CNTL/Z.
 
 """
 import telnetlib
-import time
 from textfsm import clitable
 
 class CiscoTelnet:
@@ -42,15 +41,19 @@ class CiscoTelnet:
         self._write_line(password)
         self._write_line('enable')
         self._write_line(secret)
+        self.connection.read_until(b'#', timeout=3)
+
+
     def _write_line(self, str):
         line = str.encode("ascii") + b"\n"
         return(self.connection.write(line))
+
+
     def send_show_command(self, show_command, parse=True, templates='templates', index='index'):
         if parse:
             attributes = {'Command': show_command, 'Vendor': 'cisco_ios'}
             self._write_line(show_command)
-            time.sleep(5)
-            output = self.connection.read_very_eager().decode("utf-8")
+            output = self.connection.read_until(b'#', timeout=3).decode("utf-8")
             result = list()
             cli_table_obj = clitable.CliTable(index, templates)
             cli_table_obj.ParseCmd(output, attributes)
@@ -66,16 +69,22 @@ class CiscoTelnet:
             return(result)
         else:
             self._write_line(show_command)
-            time.sleep(5)
-            return(self.connection.read_very_eager().decode("utf-8"))
+            return(self.connection.read_until(b'#', timeout=3).decode("utf-8"))
+    
+
     def send_config_commands(self, config_commands):
         self._write_line('configure terminal')
+        self.connection.read_until(b'#', timeout=3)
         if type(config_commands) == list:
+            response = str()
             for cmd in config_commands:
                 self._write_line(cmd)
+                result = self.connection.read_until(b'#', timeout=3).decode("utf-8")
+                response += result
         else:
             self._write_line(config_commands)
-        time.sleep(5)
-        return(self.connection.read_very_eager().decode("utf-8"))
+            response = self.connection.read_until(b'#', timeout=3).decode("utf-8")
+        return(response)
+
 
 print(CiscoTelnet('192.168.100.1', 'cisco', 'cisco', 'cisco').send_config_commands(['interface fa0/1', 'no desc']))

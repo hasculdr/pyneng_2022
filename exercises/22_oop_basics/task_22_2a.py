@@ -51,7 +51,6 @@ up      \r\nEthernet0/1                192.168.200.1   YES NVRAM  up...'
 
 """
 import telnetlib
-import time
 from textfsm import clitable
 
 class CiscoTelnet:
@@ -73,8 +72,7 @@ class CiscoTelnet:
         if parse:
             attributes = {'Command': show_command, 'Vendor': 'cisco_ios'}
             self._write_line(show_command)
-            time.sleep(5)
-            output = self.connection.read_very_eager().decode("utf-8")
+            output = self.connection.read_until(b'#', timeout=3).decode("utf-8")
             result = list()
             cli_table_obj = clitable.CliTable(index, templates)
             cli_table_obj.ParseCmd(output, attributes)
@@ -90,8 +88,7 @@ class CiscoTelnet:
             return(result)
         else:
             self._write_line(show_command)
-            time.sleep(5)
-            return(self.connection.read_very_eager().decode("utf-8"))
+            return(self.connection.read_until(b'#', timeout=3).decode("utf-8"))
 
 
 
