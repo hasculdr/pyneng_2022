@@ -43,3 +43,26 @@ In [6]: ip1 = IPAddress('10.1.1.1/240')
 ValueError: Incorrect mask
 
 """
+
+
+class IPAddress:
+    def __init__(self, ippref):
+        ip, mask = ippref.split('/')
+        octets = ip.split('.')
+        if len(octets) == 4:
+            for elem in octets:
+                if elem.isdigit():
+                    if int(elem) not in range(256):
+                        raise ValueError('Incorrect IPv4 address')
+                else:
+                    raise ValueError('Incorrect IPv4 address')
+            self.ip = ip
+        else:
+            raise ValueError('Incorrect IPv4 address')
+        if mask.isdigit():
+            if int(mask) not in range(8, 32):
+                raise ValueError('Incorrect mask')
+            else:
+                self.mask = int(mask)
+        else:
+            raise ValueError('Incorrect mask')

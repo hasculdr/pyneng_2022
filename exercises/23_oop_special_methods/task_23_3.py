@@ -75,3 +75,21 @@ topology_example2 = {
     ("R1", "Eth0/4"): ("R7", "Eth0/0"),
     ("R1", "Eth0/6"): ("R9", "Eth0/0"),
 }
+
+
+class Topology:
+    def __init__(self, topology_example):
+        tmp_list = list(topology_example.items())
+        for elem_big in tmp_list:
+            for elem_small in tmp_list:
+                if elem_big[0] == elem_small[1]:
+                    tmp_list.remove(elem_big)
+        self.topology = dict(tmp_list)
+
+    def __add__(self, other):
+        main_dict_obj = dict()
+        main_dict_obj.update(self.topology)
+        slave_dict_obj = dict()
+        slave_dict_obj.update(other.topology)
+        main_dict_obj.update(slave_dict_obj)
+        return(Topology(main_dict_obj))
