@@ -26,3 +26,50 @@ ErrorInCommand                            Traceback (most recent call last)
 ErrorInCommand: При выполнении команды "lo" на устройстве 192.168.100.1 возникла ошибка "Incomplete command."
 
 """
+from netmiko.cisco.cisco_ios import CiscoIosSSH
+
+
+class MyNetmiko(CiscoIosSSH):
+    def __init__(self, **device_params):
+        super().__init__(**device_params)
+        self.ip = device_params['host']
+        self.enable()
+
+    def _check_error_in_command(self, cmd, cmd_result):
+        if '%' in cmd_result:
+            start = cmd_result.find('%')
+            raise ErrorInCommand(f"При выполнении команды \"{cmd}\" на устройстве {self.ip} возникла ошибка \"{cmd_result[start:-1]}\"")
+
+    def send_command(self, cmd):
+        result = super().send_command(cmd)
+        self._check_error_in_command(cmd, result)
+        return(result)
+
+    def send_config_set(self, cfg_commands):
+        if type(cfg_commands) == list:
+            result = str()
+            for cmd in cfg_commands:
+                tmp = super().send_config_set(cmd)
+                self._check_error_in_command(cmd, tmp)
+                result += tmp
+            return(result)
+        else:
+            result = super().send_config_set(cfg_commands)
+            self._check_error_in_command(cfg_commands, result)
+            return(result)
+
+class ErrorInCommand(Exception):
+    """
+    Исключение генерируется, если при выполнении команды на оборудовании,
+    возникла ошибка.
+    """
+
+
+device_params = {
+    "device_type": "cisco_ios",
+    "host": "192.168.100.1",
+    "username": "cisco",
+    "password": "cisco",
+    "secret": "cisco",
+}
+
