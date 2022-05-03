@@ -14,10 +14,6 @@ def db_check():
         print('База данных не существует; перед добавлением данных ее нужно создать')
         return False
 
-#def db_connection():
-#    connection = sqlite3.connect('dhcp_snooping.db')
-#    return connection
-
 def switch_data_add():
     with open('switches.yml') as file_obj:
         # внутри будет словарь; ключ 'switches', значение - вложенный словарь
