@@ -24,7 +24,7 @@ def get_data(header, query):
         data = connection.execute(query)
         result = tabulate(data)
         connection.close()
-        print(header, result)
+        print(header, result, sep='\n')
     except sqlite3.OperationalError:
         print('Данный параметр не поддерживается. '
               'Допустимые значения параметров: mac, ip, vlan, interface, switch')
