@@ -78,20 +78,6 @@ positional arguments:
 optional arguments:
   -h, --help    show this help message and exit
   --db DB_FILE  имя БД
-  -s            если флаг установлен, добавлять данные коммутаторов, иначе -
-                DHCP записи
-
-
-$ python parse_dhcp_snooping.py add -h
-usage: parse_dhcp_snooping.py add [-h] [--db DB_FILE] [-s]
-                                  filename [filename ...]
-
-positional arguments:
-  filename      файл(ы), которые надо добавить
-
-optional arguments:
-  -h, --help    show this help message and exit
-  --db DB_FILE  имя БД
   -s            если флаг установлен, добавлять данные коммутаторов, иначе
                 добавлять DHCP записи
 
@@ -119,7 +105,7 @@ $ python parse_dhcp_snooping.py add sw[1-3]_dhcp_snooping.txt
 Читаю информацию из файлов
 sw1_dhcp_snooping.txt, sw2_dhcp_snooping.txt, sw3_dhcp_snooping.txt
 
-Добавляю данные по DHCP записях в dhcp_snooping.db
+Добавляю данные по DHCP записям в dhcp_snooping.db
 
 
 $ python parse_dhcp_snooping.py add -s switches.yml
