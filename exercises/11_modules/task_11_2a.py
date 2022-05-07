@@ -84,8 +84,7 @@ infiles = [
 ]
 
 def unique_network_map(topology_dict):
-    redundant_dict = create_network_map(infiles)
-    tmp_list = list(redundant_dict.items())
+    tmp_list = list(topology_dict.items())
     for elem_big in tmp_list:
         for elem_small in tmp_list:
             if elem_big[0] == elem_small[1]:
@@ -94,5 +93,6 @@ def unique_network_map(topology_dict):
     return(normalized_dict)
 
 if __name__ == '__main__':
-    print(unique_network_map(infiles))
+    topology = create_network_map(infiles)
+    print(unique_network_map(topology))
     draw_topology(unique_network_map(infiles), 'img/my_topology')
