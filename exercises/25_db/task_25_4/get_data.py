@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from sys import argv
-from pprint import pprint
 import sqlite3
 from tabulate import tabulate
 
@@ -30,7 +29,6 @@ def get_data(header, act_query, inact_query):
         act_result = tabulate(act_data)
         inact_result = tabulate(inact_data)
         connection.close()
-        print(act_result, inact_result, sep='\n')
         if len(act_result) > 0 and len(inact_result) > 0:
             print(header, act_header, act_result, inact_header, inact_result, sep='\n\n')
         elif len(act_result) > 0 and len(inact_result) == 0:
