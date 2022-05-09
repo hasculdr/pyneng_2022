@@ -34,6 +34,7 @@ pyneng.egg-info
 build
 *.img
 *.db
+.python-version
 
 # VSCode files
 .vscode/
